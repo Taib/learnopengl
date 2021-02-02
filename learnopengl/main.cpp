@@ -4,167 +4,29 @@
 #include<iostream>
 
 
+#include"Shader.h"
+#include"Mesh.h"
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
-
-class Model {
-public: 
-	Model(const float* vertices, const unsigned int * indices, unsigned int numVertices, unsigned int numIndices) 
-	{
-		indicesCount = numIndices;
-		//  any subsequent vertex attribute calls from that point on will be stored inside the VAO. 
-		glGenVertexArrays(1, &VAO);
-
-		// 1. bind Vertex Array Object
-		glBindVertexArray(VAO);
-
-		glGenBuffers(1, &EBO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * numIndices, indices, GL_STATIC_DRAW);
-
-
-		glGenBuffers(1, &VBO); // Generate a buffer ID
-		glBindBuffer(GL_ARRAY_BUFFER, VBO); // Bind the buffer to the current VAO
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * numVertices, vertices, GL_STATIC_DRAW); // Send to the GPU
-
-
-		// we can tell OpenGL how it should interpret the vertex data (per vertex attribute) using glVertexAttribPointer
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0); // giving the vertex attribute location as its argument; As given in the Vertex Shade
-		
-		// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-		glBindBuffer(GL_ARRAY_BUFFER, 0); 
-
-		// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-		// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-		glBindVertexArray(0); 
- 
-	}
-	~Model() 
-	{
-		glDeleteBuffers(1, &VBO);
-		glDeleteBuffers(1, &EBO);
-		glDeleteVertexArrays(1, &VAO);
-	}
-
-	void draw()
-	{
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		//glDrawArrays(GL_TRIANGLES, 0, 3); // the starting index of the vertex array we'd like to draw, and how many vertices  
-		glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
-		//glBindVertexArray(0); // no need to unbind it every time
-	}
-private:
-	unsigned int VBO;
-	unsigned int VAO;
-	unsigned int EBO;
-	unsigned int indicesCount;
-};
-
-class Shader {
-public:
-	Shader(const char* vertShaderText, const char* fragShaderText)
-	{ 
-		bindShader(vertShaderText, GL_VERTEX_SHADER);
-		bindShader(fragShaderText, GL_FRAGMENT_SHADER);
-
-		// A shader program object is the final linked version of multiple shaders combined. 
-		// To use the recently compiled shaders we have to link them to a shader program object
-		// and then activate this shader program when rendering objects. 
-		shaderProgram = glCreateProgram(); //  returns the ID reference to the newly created program object.
-
-		// We need to attach the previously compiled shaders to the program object and then link them with glLinkProgram: 
-		glAttachShader(shaderProgram, vertexShader);
-		glAttachShader(shaderProgram, fragmentShader);
-		glLinkProgram(shaderProgram);
-
-		// We can also check if linking a shader program failed
-		int success;
-		glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-		if (!success)
-		{
-			char infoLog[512];
-			glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-			std::cout << "ERROR::SHADER::PROGRAM_LINKING_FAILED \n" << infoLog << std::endl;
-
-		}
-
-		// we no longer need them anymore
-		glDeleteShader(vertexShader);
-		glDeleteShader(fragmentShader);
-	}
-	~Shader()
-	{
-		glDeleteProgram(shaderProgram);
-	}
-	int getUniformLocation(const char* name)
-	{
-		return glGetUniformLocation(shaderProgram, name);
-	}
-	void use() 
-	{
-		glUseProgram(shaderProgram);
-	}
-
-private:
-	void bindShader(const char* source, GLenum type)
-	{
-		unsigned int* shader = &vertexShader;
-		if (type == GL_FRAGMENT_SHADER)
-			shader = &fragmentShader; 
-
-
-		*shader = glCreateShader(type);
-		glShaderSource(*shader, 1, &source, NULL);
-		glCompileShader(*shader);
-
-		// Checking for compile - time errors is accomplished as follows :
-		int success;
-		glGetShaderiv(*shader, GL_COMPILE_STATUS, &success);
-		if (!success)
-		{
-			char infoLog[512];
-			glGetShaderInfoLog(*shader, 512, NULL, infoLog);
-			std::cout << "ERROR::SHADER::COMPILATION_FAILED \n" << infoLog << std::endl;
-		}
-	}
-	 
-	unsigned int vertexShader;
-	unsigned int fragmentShader;
-	unsigned int shaderProgram;
-};
 
 int main()
 {
 	// Properties 
 	int windowHeight = 600, windowWidth = 800;
 	float vertices[] = {
-		 0.5f,  0.5f, 0.0f,  // top right
-		 0.5f, -0.5f, 0.0f,  // bottom right
-		-0.5f, -0.5f, 0.0f,  // bottom left
-		-0.5f,  0.5f, 0.0f   // top left 
+		// positions			// colors
+		 0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // top right
+		 0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  // bottom right
+		-0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  // bottom left
+		-0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 1.0f,   // top left 
 	};
 	unsigned int indices[] = {  // note that we start from 0!
 		0, 1, 3,  // first Triangle
 		1, 2, 3   // second Triangle
 	};
-	const char* vertextShaderText = "#version 330 core\n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"out vec4 vertexColor;\n"
-		"void main()\n"
-		"{\n"
-		"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-		"   vertexColor = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-		"}\0";
-	const char* fragmentShaderText = "#version 330 core\n"
-		"out vec4 FragColor;\n" 
-		"in vec4 vertexColor;\n" 
-		"uniform vec4 ourColor;\n" 
-		"void main()\n"
-		"{\n"
-		"	FragColor = ourColor*vertexColor;\n"
-		"}\n";
+	const char* vertextShaderPath = "baseVert.vert";
+	const char* fragmentShaderPath = "baseFrag.frag";
 
 	// we first initialize GLFW, after which we can configure GLFW using glfwWindowHint
 	glfwInit();
@@ -216,10 +78,10 @@ int main()
 
 
 	// INIT MODEL And Shaders
-	Model* model = new  Model(vertices, indices, sizeof(vertices)/sizeof(vertices[0]), sizeof(indices) / sizeof(indices[0])); 
-	Shader* shader =  new Shader(vertextShaderText, fragmentShaderText);
+	Mesh* mesh = new  Mesh(vertices, indices, sizeof(vertices)/sizeof(vertices[0]), sizeof(indices) / sizeof(indices[0])); 
+	Shader* shader =  new Shader(vertextShaderPath, fragmentShaderPath);
 
-	int ourColorLocation = shader->getUniformLocation("ourColor");//  We first need to find the index/location of the uniform attribute in our shader.
+	int ourColorLocation = shader->getUniformLocation("myColor");//  We first need to find the index/location of the uniform attribute in our shader.
 
 
 	// uncomment this call to draw in wireframe polygons.
@@ -243,7 +105,7 @@ int main()
 		glUniform4f(ourColorLocation, gValue, 1, 1, 1);
 
 		// Draw the model
-		model->draw();
+		mesh->draw();
 
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window);
