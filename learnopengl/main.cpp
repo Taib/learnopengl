@@ -17,17 +17,17 @@ int main()
 	int windowHeight = 600, windowWidth = 800;
 	float vertices[] = {
 		// positions			// colors		// UVs
-		 0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f, // top right
-		 0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  1.0f, 0.0f, // bottom right
-		-0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f, // bottom left
-		-0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 1.0f,  0.0f, 1.0f, // top left 
+		 0.85f,  0.85f, 0.0f,  1.0f, 0.0f, 0.0f,  2.0f, 2.0f, // top right
+		 0.85f, -0.85f, 0.0f,  1.0f, 1.0f, 0.0f,  2.0f, 0.0f, // bottom right
+		-0.85f, -0.85f, 0.0f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f, // bottom left
+		-0.85f,  0.85f, 0.0f,  1.0f, 0.0f, 1.0f,  0.0f, 2.0f, // top left 
 	};
 	unsigned int indices[] = {  // note that we start from 0!
 		0, 1, 3,  // first Triangle
 		1, 2, 3   // second Triangle
 	};
 	const char* vertextShaderPath = "Shaders/baseVert.vs";
-	const char* fragmentShaderPath = "Shaders/baseFrag.fs";
+	const char* fragmentShaderPath = "Shaders/baseAnimFrag.fs";
 
 	// we first initialize GLFW, after which we can configure GLFW using glfwWindowHint
 	glfwInit();
@@ -104,9 +104,8 @@ int main()
 		//checkerBoardTex->bind(); // use a texture
 
 
-		float timeValue = glfwGetTime(); // we retrieve the running time in seconds 
-		float gValue = (sin(timeValue) / 2.0) + 0.5f; // we vary the color in the range of [0.0 - 1.0] 
-		shader->setFloat4("myColor", gValue, 1, 1, 1);
+		float timeValue = glfwGetTime(); // we retrieve the running time in seconds  
+		shader->setFloat("time", glfwGetTime());
 
 		shader->setInt("mainTexture", 0);
 		shader->setInt("secondTexture", 1);

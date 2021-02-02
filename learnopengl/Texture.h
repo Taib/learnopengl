@@ -32,6 +32,8 @@ Texture::Texture(const char* imagePath, int index=0, bool hasAlpha)
 {	
 	texture = 0; // init
 	this->index = index;
+	
+	float borderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	// load the texture data
 	int width, height, nChannels;
@@ -52,8 +54,9 @@ Texture::Texture(const char* imagePath, int index=0, bool hasAlpha)
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	// set the texture wrapping options on the currently bound texture
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
 	// set the texture filtering options
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
