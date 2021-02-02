@@ -6,6 +6,7 @@
 
 #include"Shader.h"
 #include"Mesh.h"
+#include"Texture.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -15,18 +16,18 @@ int main()
 	// Properties 
 	int windowHeight = 600, windowWidth = 800;
 	float vertices[] = {
-		// positions			// colors
-		 0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  // top right
-		 0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  // bottom right
-		-0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  // bottom left
-		-0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 1.0f,   // top left 
+		// positions			// colors		// UVs
+		 0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f, // top right
+		 0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  1.0f, 0.0f, // bottom right
+		-0.5f, -0.5f, 0.0f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f, // bottom left
+		-0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 1.0f,  0.0f, 1.0f, // top left 
 	};
 	unsigned int indices[] = {  // note that we start from 0!
 		0, 1, 3,  // first Triangle
 		1, 2, 3   // second Triangle
 	};
-	const char* vertextShaderPath = "baseVert.vert";
-	const char* fragmentShaderPath = "baseFrag.frag";
+	const char* vertextShaderPath = "Shaders/baseVert.vs";
+	const char* fragmentShaderPath = "Shaders/baseFrag.fs";
 
 	// we first initialize GLFW, after which we can configure GLFW using glfwWindowHint
 	glfwInit();
@@ -80,9 +81,8 @@ int main()
 	// INIT MODEL And Shaders
 	Mesh* mesh = new  Mesh(vertices, indices, sizeof(vertices)/sizeof(vertices[0]), sizeof(indices) / sizeof(indices[0])); 
 	Shader* shader =  new Shader(vertextShaderPath, fragmentShaderPath);
-
-	int ourColorLocation = shader->getUniformLocation("myColor");//  We first need to find the index/location of the uniform attribute in our shader.
-
+	Texture* cartoonTex = new Texture("Resources/cartoon.png", 0, false);
+	Texture* checkerBoardTex = new Texture("Resources/diffuse_puzzle.png", 1, false);
 
 	// uncomment this call to draw in wireframe polygons.
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -96,13 +96,20 @@ int main()
 		glClearColor(0.2f, 0.2f, 0.3f, 0.1f); // We want to clear the screen with a color of our choice. 
 		glClear(GL_COLOR_BUFFER_BIT); // The possible bits we can set are GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT and GL_STENCIL_BUFFER_BIT. 
 
+
 		// Bind the shader
 		shader->use();
+
+		//cartoonTex->bind(); // use a texture
+		//checkerBoardTex->bind(); // use a texture
 
 
 		float timeValue = glfwGetTime(); // we retrieve the running time in seconds 
 		float gValue = (sin(timeValue) / 2.0) + 0.5f; // we vary the color in the range of [0.0 - 1.0] 
-		glUniform4f(ourColorLocation, gValue, 1, 1, 1);
+		shader->setFloat4("myColor", gValue, 1, 1, 1);
+
+		shader->setInt("mainTexture", 0);
+		shader->setInt("secondTexture", 1);
 
 		// Draw the model
 		mesh->draw();

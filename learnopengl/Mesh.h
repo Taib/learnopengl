@@ -20,9 +20,10 @@ Mesh::Mesh(const float* vertices, const unsigned int* indices, unsigned int numV
 	//  any subsequent vertex attribute calls from that point on will be stored inside the VAO. 
 	glGenVertexArrays(1, &VAO);
 
-	// 1. bind Vertex Array Object
+	// bind Vertex Array Object
 	glBindVertexArray(VAO);
 
+	// Creating and binding the Element Buffer Object
 	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * numIndices, indices, GL_STATIC_DRAW);
@@ -31,13 +32,17 @@ Mesh::Mesh(const float* vertices, const unsigned int* indices, unsigned int numV
 	glGenBuffers(1, &VBO); // Generate a buffer ID
 	glBindBuffer(GL_ARRAY_BUFFER, VBO); // Bind the buffer to the current VAO
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * numVertices, vertices, GL_STATIC_DRAW); // Send to the GPU 
+
 	// we can tell OpenGL how it should interpret the vertex data (per vertex attribute) using glVertexAttribPointer
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0); // giving the vertex attribute location as its argument; As given in the Vertex Shade
 	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	// texture attribute
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

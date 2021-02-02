@@ -18,6 +18,7 @@ public:
 	void setBool(const std::string& name, bool value) const;
 	void setInt(const std::string& name, int value) const;
 	void setFloat(const std::string& name, float value) const;
+	void setFloat4(const std::string& name, float x, float y, float z, float w) const;
 
 private:
 	void bindShader(const char* source, GLenum type);
@@ -88,6 +89,10 @@ void Shader::setFloat(const std::string& name, float value) const
 	glUniform1f(getUniformLocation(name.c_str()), value);
 }
 
+void Shader::setFloat4(const std::string& name, float x, float y, float z, float w) const
+{ 
+	glUniform4f(getUniformLocation(name.c_str()), x, y, z, w);
+}
 
 void Shader::bindShader(const char* sourcePath, GLenum type)
 {

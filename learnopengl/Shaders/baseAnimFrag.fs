@@ -5,6 +5,7 @@ in vec3 vertexColor;
 in vec2 vertexUV;
  
 uniform vec4 myColor; // getting some random color
+uniform float time; // getting the glfw_time
 
 uniform sampler2D mainTexture; // using a texture
 uniform sampler2D secondTexture; // using a texture
