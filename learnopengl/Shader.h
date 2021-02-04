@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include<iostream>
 
+#include<glm/gtc/type_ptr.hpp>
+
 #include "IOFile.h"
 
 class Shader {
@@ -19,6 +21,7 @@ public:
 	void setInt(const std::string& name, int value) const;
 	void setFloat(const std::string& name, float value) const;
 	void setFloat4(const std::string& name, float x, float y, float z, float w) const;
+	void setMat4(const std::string& name, glm::mat4 mat) const;
 
 private:
 	void bindShader(const char* source, GLenum type);
@@ -92,6 +95,21 @@ void Shader::setFloat(const std::string& name, float value) const
 void Shader::setFloat4(const std::string& name, float x, float y, float z, float w) const
 { 
 	glUniform4f(getUniformLocation(name.c_str()), x, y, z, w);
+}
+
+void Shader::setMat4(const std::string& name, glm::mat4 mat) const
+{
+	/*
+	std::cout << name << std::endl;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			std::cout << mat[i][j] << ", ";
+		}
+		std::cout  << std::endl;
+	}*/
+	glUniformMatrix4fv(getUniformLocation(name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 void Shader::bindShader(const char* sourcePath, GLenum type)

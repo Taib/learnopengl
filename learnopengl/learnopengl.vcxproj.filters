@@ -38,10 +38,14 @@
     <ClInclude Include="stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\baseFrag.fs" />
     <None Include="Shaders\baseVert.vs" />
     <None Include="Shaders\baseAnimFrag.fs" />
+    <None Include="Shaders\cameraVert.vs" />
   </ItemGroup>
 </Project>

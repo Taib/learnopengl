@@ -152,6 +152,7 @@
     <ClInclude Include="IOFile.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture.h" />
   </ItemGroup>
@@ -159,6 +160,7 @@
     <None Include="Shaders\baseAnimFrag.fs" />
     <None Include="Shaders\baseFrag.fs" />
     <None Include="Shaders\baseVert.vs" />
+    <None Include="Shaders\cameraVert.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

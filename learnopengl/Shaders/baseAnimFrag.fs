@@ -12,7 +12,7 @@ uniform sampler2D secondTexture; // using a texture
 void main()
 {
     
-    //FragColor = vec4(vertexColor, 1.0) * myColor; 
+    FragColor = vec4(vertexColor, 1.0); return;
     //FragColor = vec4(vertexUV, 0,1); // coloring with the uvs
      
     
