@@ -16,9 +16,13 @@
 #include"Texture.h"
 #include"Camera.h"
 
+#include"ToyMeshData.h"
+
 //
 // Callback functions definition
 //
+
+int main();
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -47,43 +51,6 @@ Camera* camera = new Camera();
 //
 int main()
 {
-	// Properties 
-	float vertices[] = {
-		// positions			// colors		// UVs
-		 0.2f,  0.2f, 0.3f,  1.0f, 0.0f, 0.0f,  2.0f, 2.0f, // top right
-		 0.2f, -0.2f, 0.3f,  1.0f, 1.0f, 0.0f,  2.0f, 0.0f, // bottom right
-		-0.2f, -0.2f, 0.3f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f, // bottom left
-		-0.3f,  0.2f, 0.3f,  1.0f, 0.0f, 1.0f,  0.0f, 2.0f, // top left 
-
-		// Backvertices
-		 0.2f,  0.2f, -0.3f,  1.0f, 0.0f, 0.0f,  2.0f, 2.0f, // top right
-		 0.2f, -0.2f, -0.3f,  1.0f, 1.0f, 0.0f,  2.0f, 0.0f, // bottom right
-		-0.2f, -0.2f, -0.3f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f, // bottom left
-		-0.2f,  0.2f, -0.3f,  1.0f, 0.0f, 1.0f,  0.0f, 2.0f, // top left 
-
-	};
-	unsigned int indices[] = {  // note that we start from 0!
-		0, 1, 3,  // first Triangle
-		1, 2, 3,   // second Triangle
-
-		4, 5, 7,  // back first Triangle
-		5, 6, 7,   // back  second Triangle
-
-		4, 0, 7,  // top first Triangle
-		0, 3, 7,   // top  second Triangle
-
-		5, 1, 6,  // bottom first Triangle
-		1, 2, 6,   // bottom second Triangle
-
-		4, 5, 0,  // right first Triangle
-		5, 1, 0,  // right second Triangle
-
-		3, 2, 7,  // left first Triangle
-		2, 6, 7   // left second Triangle
-	};
-	const char* vertextShaderPath = "Shaders/cameraVert.vs";
-	const char* fragmentShaderPath = "Shaders/baseAnimFrag.fs";
-
 	// we first initialize GLFW, after which we can configure GLFW using glfwWindowHint
 	glfwInit();
 
@@ -136,9 +103,22 @@ int main()
 
 	// INIT MODEL And Shaders
 	// ----------------------
-	Mesh* mesh = new  Mesh(vertices, indices, sizeof(vertices) / sizeof(vertices[0]), sizeof(indices) / sizeof(indices[0]));
-	Mesh* mesh2 = new  Mesh(vertices, indices, sizeof(vertices) / sizeof(vertices[0]), sizeof(indices) / sizeof(indices[0]));
-	Shader* shader =  new Shader(vertextShaderPath, fragmentShaderPath);
+	Mesh* cubeMesh = new  Mesh();
+	cubeMesh->CreateVCT(
+		toyData::cubeVertexColorUVs, 
+		toyData::cubeIndices, 
+		sizeof(toyData::cubeVertexColorUVs) / sizeof(toyData::cubeVertexColorUVs[0]), 
+		sizeof(toyData::cubeIndices) / sizeof(toyData::cubeIndices[0])
+	);
+	Mesh* lightCube = new  Mesh();
+	lightCube->CreateV(
+		toyData::cubeVerticesOnly,
+		toyData::cubeIndices,
+		sizeof(toyData::cubeVerticesOnly) / sizeof(toyData::cubeVerticesOnly[0]),
+		sizeof(toyData::cubeIndices) / sizeof(toyData::cubeIndices[0])
+	);
+	Shader* cubeShader = new Shader("Shaders/Ch1/cameraVert.vs", "Shaders/Ch2/baseLighting.fs");
+	Shader* lightShader = new Shader("Shaders/Ch2/lightVert.vs", "Shaders/Ch2/lightFrag.fs");
 	Texture* cartoonTex = new Texture("Resources/cartoon.png", 0, false);
 	Texture* checkerBoardTex = new Texture("Resources/diffuse_puzzle.png", 1, false);
 	 
@@ -169,36 +149,48 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // The possible bits we can set are GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT and GL_STENCIL_BUFFER_BIT. 
 
 
+		glm::mat4 projectionMat = glm::perspective(glm::radians(camera->getFOV()), (float)windowWidth / (float)windowHeight, 0.1f, 100.f);
+		
+		/// First Mesh 
+		// --------------------------------------------------------------------------------------
+
 		// Bind the shader
-		shader->use();
-		shader->setMat4("projection", glm::perspective(glm::radians(camera->getFOV()), (float)windowWidth / (float)windowHeight, 0.1f, 100.f));
+		cubeShader->use();
+		cubeShader->setMat4("projection", projectionMat);
 
-		//cartoonTex->bind(); // use a texture
-		//checkerBoardTex->bind(); // use a texture
-
+		cartoonTex->bind(); // use a texture
+		checkerBoardTex->bind(); // use a texture 
 		  
-		shader->setFloat("time", curTime);
+		cubeShader->setFloat("time", curTime);
 
-		shader->setInt("mainTexture", 0);
-		shader->setInt("secondTexture", 1); 
+		cubeShader->setFloat3("objectColor", glm::vec3(0.2f, 0.8f, 0.3f));
+		cubeShader->setFloat3("lightColor", glm::vec3(1.0f));
 
-		shader->setMat4("view", camera->getViewMatrix());
+		cubeShader->setMat4("view", camera->getViewMatrix());
 		
 		glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f,0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		float angle = 20.0f ;
 		model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-		shader->setMat4("model", model); 
+		cubeShader->setMat4("model", model); 
 		// Draw the model
-		mesh->draw();
+		cubeMesh->draw();
+
+		/// Second Mesh 
+		// --------------------------------------------------------------------------------------
+		lightShader->use();
 
 		model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-		model = glm::translate(model, glm::vec3(1.0f, 1.0f, 0.0f)); 
+		model = glm::translate(model, glm::vec3(1.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1.0f, 0.3f, 0.5f));
-		shader->setMat4("model", model);
-		// Draw the model2
-		mesh2->draw();
+		model = glm::scale(model,  glm::vec3(0.3f));
 
+		lightShader->setMat4("PVM", projectionMat * camera->getViewMatrix() * model); 
+		
+		// Draw the model2
+		lightCube->draw();
+
+		// --------------------------------------------------------------------------------------
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -268,7 +260,6 @@ void mouseInput(GLFWwindow* window, double mouseXPos, double mouseYPos)
 	lastMouseY = mouseYPos;
 
 
-	std::cout << "mouseInput << mouseXPos: " << mouseXPos << ", mouseYPos : " << mouseYPos << " -- lastMouseX: " << lastMouseX << ", lastMouseY: " << lastMouseY << std::endl;
 	camera->mouseMovement(xOffset * deltaTime, yOffset*deltaTime);
 
 }

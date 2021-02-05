@@ -41,11 +41,20 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\Ch2\ToyMeshData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToyMeshData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\baseFrag.fs" />
-    <None Include="Shaders\baseVert.vs" />
-    <None Include="Shaders\baseAnimFrag.fs" />
-    <None Include="Shaders\cameraVert.vs" />
+    <None Include="Shaders\Ch1\cameraVert.vs" />
+    <None Include="Shaders\Ch1\baseVert.vs" />
+    <None Include="Shaders\Ch1\baseFrag.fs" />
+    <None Include="Shaders\Ch1\baseAnimFrag.fs" />
+    <None Include="Shaders\Ch2\lightFrag.fs" />
+    <None Include="Shaders\Ch2\lightVert.vs" />
+    <None Include="Shaders\Ch2\baseLighting.fs" />
   </ItemGroup>
 </Project>

@@ -153,14 +153,19 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Shaders\Ch2\ToyMeshData.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="ToyMeshData.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\baseAnimFrag.fs" />
-    <None Include="Shaders\baseFrag.fs" />
-    <None Include="Shaders\baseVert.vs" />
-    <None Include="Shaders\cameraVert.vs" />
+    <None Include="Shaders\Ch1\baseAnimFrag.fs" />
+    <None Include="Shaders\Ch1\baseFrag.fs" />
+    <None Include="Shaders\Ch1\baseVert.vs" />
+    <None Include="Shaders\Ch1\cameraVert.vs" />
+    <None Include="Shaders\Ch2\baseLighting.fs" />
+    <None Include="Shaders\Ch2\lightFrag.fs" />
+    <None Include="Shaders\Ch2\lightVert.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

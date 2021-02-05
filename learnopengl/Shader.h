@@ -21,6 +21,8 @@ public:
 	void setInt(const std::string& name, int value) const;
 	void setFloat(const std::string& name, float value) const;
 	void setFloat4(const std::string& name, float x, float y, float z, float w) const;
+	void setFloat3(const std::string& name, float x, float y, float z) const;
+	void setFloat3(const std::string& name, glm::vec3 vec) const;
 	void setMat4(const std::string& name, glm::mat4 mat) const;
 
 private:
@@ -63,6 +65,34 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 }
+void Shader::bindShader(const char* sourcePath, GLenum type)
+{
+
+	std::string source = IOFile::readFile(sourcePath); // tried to return directly a const char* but exception thrown
+	const char* sourceText = source.c_str();           // so using first a string and converting it to a c_str
+
+	unsigned int* shader = &vertexShader;
+
+	if (type == GL_FRAGMENT_SHADER)
+		shader = &fragmentShader;
+
+
+	*shader = glCreateShader(type);
+	glShaderSource(*shader, 1, &sourceText, NULL);
+	glCompileShader(*shader);
+
+	// Checking for compile - time errors is accomplished as follows :
+	int success;
+	glGetShaderiv(*shader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		char infoLog[1024];
+		glGetShaderInfoLog(*shader, 1024, NULL, infoLog);
+		std::cout << "ERROR::SHADER::" << ((type == GL_FRAGMENT_SHADER) ? "FRAGMENT" : "VERTEX") << "::COMPILATION_FAILED  -- <<" << sourcePath << " \n\t" << infoLog << std::endl;
+	}
+}
+
+
 
 Shader::~Shader()
 {
@@ -97,46 +127,17 @@ void Shader::setFloat4(const std::string& name, float x, float y, float z, float
 	glUniform4f(getUniformLocation(name.c_str()), x, y, z, w);
 }
 
-void Shader::setMat4(const std::string& name, glm::mat4 mat) const
+inline void Shader::setFloat3(const std::string& name, float x, float y, float z) const
 {
-	/*
-	std::cout << name << std::endl;
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++)
-		{
-			std::cout << mat[i][j] << ", ";
-		}
-		std::cout  << std::endl;
-	}*/
+	glUniform3f(getUniformLocation(name.c_str()), x, y, z);
+}
+
+inline void Shader::setFloat3(const std::string& name, glm::vec3 vec) const
+{
+	glUniform3fv(getUniformLocation(name.c_str()), 1, glm::value_ptr(vec));
+}
+
+void Shader::setMat4(const std::string& name, glm::mat4 mat) const
+{ 
 	glUniformMatrix4fv(getUniformLocation(name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
-
-void Shader::bindShader(const char* sourcePath, GLenum type)
-{
-
-	std::string source = IOFile::readFile(sourcePath); // tried to return directly a const char* but exception thrown
-	const char* sourceText = source.c_str();           // so using first a string and converting it to a c_str
-
-	unsigned int* shader = &vertexShader;
-
-	if (type == GL_FRAGMENT_SHADER)
-		shader = &fragmentShader;
-
-
-	*shader = glCreateShader(type);
-	glShaderSource(*shader, 1, &sourceText, NULL);
-	glCompileShader(*shader);
-
-	// Checking for compile - time errors is accomplished as follows :
-	int success;
-	glGetShaderiv(*shader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		char infoLog[1024];
-		glGetShaderInfoLog(*shader, 1024, NULL, infoLog);
-		std::cout << "ERROR::SHADER::" << ((type == GL_FRAGMENT_SHADER) ? "FRAGMENT" : "VERTEX") << "::COMPILATION_FAILED \n" << infoLog << std::endl;
-	}
-}
-
- 
